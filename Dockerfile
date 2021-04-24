@@ -1,15 +1,24 @@
-FROM ubuntu:18.04
+FROM python:3.8.9
 
 ENV LANG C.UTF-8
 ENV TZ Asia/Tokyo
 ENV PYTHONIOENCODING "utf-8"
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get update -y && \
-    apt-get upgrade -y
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+  make \
+  curl \
+  git \
+  libffi-dev \
+  cron \
+  vim \
+  wget \
+  tree \
+  fonts-takao-gothic
 
-RUN apt-get install -y python3 python3-pip make curl git libffi-dev cron vim wget tree language-pack-ja
-
+# Node.js v16
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+  && apt-get install -y nodejs
 
 # MeCab
 WORKDIR /opt
@@ -22,8 +31,8 @@ RUN ./configure  --enable-utf8-only \
   && ldconfig
 WORKDIR /opt/mecab/mecab-ipadic
 RUN ./configure --with-charset=utf8 \
- && make \
- && make install
+  && make \
+  && make install
 
 # neolog-ipadic
 WORKDIR /opt
@@ -33,19 +42,19 @@ RUN ./bin/install-mecab-ipadic-neologd -n -y
 
 # CRF++
 RUN wget -O /tmp/CRF++-0.58.tar.gz 'https://drive.google.com/uc?export=download&id=0B4y35FiV1wh7QVR6VXJ5dWExSTQ' \
-    && cd /tmp/ \
-    && tar zxf CRF++-0.58.tar.gz \
-    && cd CRF++-0.58 \
-    && ./configure \
-    && make \
-    && make install
+  && cd /tmp/ \
+  && tar zxf CRF++-0.58.tar.gz \
+  && cd CRF++-0.58 \
+  && ./configure \
+  && make \
+  && make install
 
 # CaboCha
 RUN cd /tmp \
   && curl -c cabocha-0.69.tar.bz2 -s -L "https://drive.google.com/uc?export=download&id=0B4y35FiV1wh7SDd1Q1dUQkZQaUU" \
-    | grep confirm | sed -e "s/^.*confirm=\(.*\)&amp;id=.*$/\1/" \
-    | xargs -I{} curl -b  cabocha-0.69.tar.bz2 -L -o cabocha-0.69.tar.bz2 \
-      "https://drive.google.com/uc?confirm={}&export=download&id=0B4y35FiV1wh7SDd1Q1dUQkZQaUU" \
+  | grep confirm | sed -e "s/^.*confirm=\(.*\)&amp;id=.*$/\1/" \
+  | xargs -I{} curl -b  cabocha-0.69.tar.bz2 -L -o cabocha-0.69.tar.bz2 \
+  "https://drive.google.com/uc?confirm={}&export=download&id=0B4y35FiV1wh7SDd1Q1dUQkZQaUU" \
   && tar jxf cabocha-0.69.tar.bz2 \
   && cd cabocha-0.69 \
   && export CPPFLAGS=-I/usr/local/include \
@@ -64,7 +73,13 @@ RUN cd /tmp \
 COPY requirements.txt /home
 WORKDIR /home
 RUN python3 -m pip install pip --upgrade \
-    && python3 -m pip install torch==1.7.0+cpu torchvision==0.8.1+cpu torchaudio==0.7.0 -f https://download.pytorch.org/whl/torch_stable.html \
-    && python3 -m pip install -r requirements.txt
-# for transformers
-RUN python3 -m pip install ipywidgets && jupyter nbextension enable --py widgetsnbextension
+  && python3 -m pip install -r requirements.txt
+
+# jupyterlab extension
+RUN jupyter contrib nbextension install --user \
+  && jupyter nbextensions_configurator enable --user \
+  && jupyter labextension install @jupyterlab/toc @ryantam626/jupyterlab_code_formatter \
+  && jupyter serverextension enable --py jupyterlab_code_formatter
+
+# poetry
+RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
