@@ -75,6 +75,9 @@ WORKDIR /home
 RUN python3 -m pip install pip --upgrade \
   && python3 -m pip install -r requirements.txt
 
+# SpaCy
+RUN python3 -m spacy download en_core_web_sm
+
 # jupyterlab extension
 RUN jupyter contrib nbextension install --user \
   && jupyter nbextensions_configurator enable --user \
