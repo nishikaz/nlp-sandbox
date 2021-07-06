@@ -6,6 +6,7 @@ ENV PYTHONIOENCODING "utf-8"
 ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+  cmake \
   make \
   curl \
   git \
@@ -68,6 +69,24 @@ RUN cd /tmp \
   && rm /tmp/cabocha-0.69.tar.bz2 \
   && rm -rf /tmp/cabocha-0.69 \
   && ldconfig
+
+# Juman++
+RUN wget -O /tmp/jumanpp-2.0.0-rc3.tar.xz 'https://github.com/ku-nlp/jumanpp/releases/download/v2.0.0-rc3/jumanpp-2.0.0-rc3.tar.xz' \
+  && cd /tmp/ \
+  && tar xf jumanpp-2.0.0-rc3.tar.xz \
+  && mkdir build \
+  && cd build \
+  && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX='/usr/local' \
+  && make install -j
+
+# KNP
+RUN wget -O /tmp/knp-4.20.tar.bz2 'https://nlp.ist.i.kyoto-u.ac.jp/DLcounter/lime.cgi?down=https://nlp.ist.i.kyoto-u.ac.jp/nl-resource/knp/knp-4.20.tar.bz2&name=knp-4.20.tar.bz2' \
+  && cd /tmp/ \
+  && tar jxvf knp-4.20.tar.bz2 \
+  && cd knp-4.20 \
+  && ./configure \
+  && make \
+  && make installl
 
 # pip
 COPY requirements.txt /home

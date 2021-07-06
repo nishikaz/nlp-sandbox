@@ -13,6 +13,7 @@ jupyter-contrib-nbextensions
 mecab-python3
 numpy
 pandas
+pyknp
 regex
 requests
 sacremoses
