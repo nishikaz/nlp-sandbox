@@ -74,6 +74,7 @@ RUN cd /tmp \
 RUN wget -O /tmp/jumanpp-2.0.0-rc3.tar.xz 'https://github.com/ku-nlp/jumanpp/releases/download/v2.0.0-rc3/jumanpp-2.0.0-rc3.tar.xz' \
   && cd /tmp/ \
   && tar xf jumanpp-2.0.0-rc3.tar.xz \
+  && cd jumanpp-2.0.0-rc3 \
   && mkdir build \
   && cd build \
   && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX='/usr/local' \
